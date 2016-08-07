@@ -1,0 +1,7 @@
+body {
+    background: transparent;
+}
+
+.hau-background {
+    background: url('/images/hau_bg.png') rgb(153, 0, 0) no-repeat bottom left fixed;
+}

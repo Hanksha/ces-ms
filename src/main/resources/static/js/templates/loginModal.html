@@ -1,0 +1,19 @@
+<div class="modal-header">
+  <h4 class="modal-title">Please sign in.</h4>
+</div>
+<div class="modal-body">
+  <form role="form">
+    <fieldset>
+      <div class="form-group">
+        <input class="form-control" ng-model="credentials.email" placeholder="Email" name="email" type="email" autofocus>
+      </div>
+      <div class="form-group">
+        <input class="form-control" ng-model="credentials.password" placeholder="Mot de passe" name="password" type="password">
+      </div>
+    </fieldset>
+  </form>
+</div>
+<div class="modal-footer">
+  <button class="btn btn-primary" type="button" ng-click="login()">Login</button>
+  <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+</div>
