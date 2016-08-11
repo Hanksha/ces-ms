@@ -1,6 +1,7 @@
 package com.hanksha.ces.controller
 
 import com.hanksha.ces.data.ParticipationRepository
+import com.hanksha.ces.data.models.Involvement
 import com.hanksha.ces.data.models.Participation
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -57,5 +58,33 @@ class ParticipationController {
         participationRepo.update(participation)
     }
 
+    @RequestMapping(value = '/{id}', method = RequestMethod.DELETE)
+    @ResponseStatus(HttpStatus.OK)
+    void deleteParticipation(@PathVariable int id) {
+        participationRepo.delete(id)
+    }
+
+    @RequestMapping(value = '/{id}/involvements', method = RequestMethod.GET)
+    ResponseEntity getInvolvements(@PathVariable int id) {
+
+        def involvements = participationRepo.findInvolvements(id)
+
+        if(!involvements)
+            return new ResponseEntity(HttpStatus.NOT_FOUND)
+
+        new ResponseEntity(involvements, HttpStatus.OK)
+    }
+
+    @RequestMapping(value = '{id}/involvements/{type}', method = RequestMethod.DELETE)
+    @ResponseStatus(HttpStatus.OK)
+    void deleteInvolvement(@PathVariable int id, @PathVariable String type) {
+        participationRepo.deleteInvolvement(new Involvement(participationId: id, type: type))
+    }
+
+    @RequestMapping(value = '/{id}/involvements', method = RequestMethod.POST)
+    @ResponseStatus(HttpStatus.OK)
+    void createInvolvement(@RequestBody Involvement involvement) {
+        participationRepo.saveInvolvement(involvement)
+    }
 
 }

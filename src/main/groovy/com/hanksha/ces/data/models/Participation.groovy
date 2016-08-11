@@ -1,5 +1,6 @@
 package com.hanksha.ces.data.models
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import groovy.transform.Canonical;
 
 import javax.validation.constraints.NotNull;
@@ -19,5 +20,8 @@ public class Participation {
 	Date date;
 
 	String remarks;
+
+	@JsonProperty
+	String get
 
 }

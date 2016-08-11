@@ -1,5 +1,6 @@
 package com.hanksha.ces.data
 
+import com.hanksha.ces.data.models.Involvement
 import org.springframework.jdbc.support.GeneratedKeyHolder
 import org.springframework.jdbc.support.KeyHolder
 
@@ -95,23 +96,47 @@ class JdbcParticipationRepository implements ParticipationRepository {
 	}
 
 
-	boolean delete(Participation participation) throws DataAccessException {
+	void delete(int id) throws DataAccessException {
 		jdbc.update(
 				'DELETE FROM participations ' +
 				'WHERE id = ?',
-				participation.getId())
+				id)
+	}
 
-		true
+	List<Involvement> findInvolvements(int id) {
+		jdbc.query(
+				'SELECT participation_id, type ' +
+				'FROM participation_involvements ' +
+				'WHERE participation_id = ?',
+				new InvolvementRowMapper(), id)
+	}
+
+	void saveInvolvement(Involvement involvement) {
+		jdbc.update('INSERT INTO participation_involvements VALUES (?,?)',
+				involvement.participationId, involvement.type)
+	}
+
+	void deleteInvolvement(Involvement involvement) {
+		jdbc.update('DELETE FROM participation_involvements WHERE participation_id = ? AND type = ?',
+				involvement.participationId, involvement.type)
 	}
 
 	static class ParticipationRowMapper implements RowMapper<Participation> {
-		public Participation mapRow(ResultSet rs, int rowNum) throws SQLException {
+		Participation mapRow(ResultSet rs, int rowNum) throws SQLException {
 			new Participation(
 					id: rs.getInt('id'),
 					memberId: rs.getInt('member_id'),
 					activityId: rs.getInt('activity_id'),
 					date: new Date(rs.getDate('date').time),
 					remarks: rs.getString('remarks'))
+		}
+	}
+
+	static class InvolvementRowMapper implements RowMapper<Involvement> {
+		Involvement mapRow(ResultSet rs, int rowNum) throws SQLException {
+			new Involvement(
+					participationId: rs.getInt('participation_id'),
+					type: rs.getString('type'))
 		}
 	}
 }

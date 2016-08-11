@@ -2,6 +2,7 @@ package com.hanksha.ces
 
 import com.hanksha.ces.data.models.Activity
 import com.hanksha.ces.data.models.Department
+import com.hanksha.ces.data.models.Involvement
 import com.hanksha.ces.data.models.InvolvementType
 import com.hanksha.ces.data.models.Member
 import com.hanksha.ces.data.models.Participation
@@ -15,7 +16,6 @@ import org.junit.runners.MethodSorters
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.SpringApplicationConfiguration
 import org.springframework.http.MediaType
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import org.springframework.test.context.web.WebAppConfiguration
 import org.springframework.test.web.servlet.MockMvc
@@ -29,7 +29,6 @@ import static org.hamcrest.Matchers.*
 
 @RunWith(SpringJUnit4ClassRunner)
 @FixMethodOrder(MethodSorters.JVM)
-@ActiveProfiles(['test'])
 @SpringApplicationConfiguration(classes = CesMsApplication)
 @WebAppConfiguration
 class CesMsApplicationTests {
@@ -404,7 +403,7 @@ class CesMsApplicationTests {
 
 	@Test
 	void 'participation-update'() {
-		def pcpt = new Participation(memberId: 2, activityId: 2, date: new Date(), remarks: 'Great')
+		def pcpt = new Participation(memberId: 3, activityId: 3, date: new Date(), remarks: 'Great')
 
 		mockMvc.perform(post(PARTICIPATION_URI).contentType(MediaType.APPLICATION_JSON_UTF8)
 				.content(JsonOutput.toJson(pcpt).bytes))
@@ -420,6 +419,59 @@ class CesMsApplicationTests {
 		mockMvc.perform(get("$PARTICIPATION_URI/$pcpt.id"))
 			.andExpect(status().isOk())
 			.andExpect(jsonPath('$.remarks', is(pcpt.remarks)))
+	}
+
+	@Test
+	void 'participation-delete'() {
+		def pcpt = new Participation(memberId: 2, activityId: 2, date: new Date(), remarks: 'Great')
+
+		mockMvc.perform(post(PARTICIPATION_URI).contentType(MediaType.APPLICATION_JSON_UTF8)
+				.content(JsonOutput.toJson(pcpt).bytes))
+				.andExpect(status().isOk())
+				.andDo({pcpt.id = slurper.parseText(it.response.contentAsString).id})
+
+		mockMvc.perform(delete("$PARTICIPATION_URI/$pcpt.id"))
+			.andExpect(status().isOk())
+
+		mockMvc.perform(get("$PARTICIPATION_URI/$pcpt.id"))
+			.andExpect(status().isNotFound())
+	}
+
+	@Test
+	void 'participation-involvement-get'() {
+		mockMvc.perform(get("$PARTICIPATION_URI/1/involvements"))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath('$[?(@.type == "Participant")]').exists())
+			.andExpect(jsonPath('$[?(@.type == "Facilitator")]').exists())
+	}
+
+	@Test
+	void 'participation-involvement-save'() {
+		def involvement = new Involvement(participationId: 1, type: 'Lecturer')
+
+		mockMvc.perform(post("$PARTICIPATION_URI/involvements").contentType(MediaType.APPLICATION_JSON_UTF8)
+			.content(JsonOutput.toJson(involvement).bytes))
+				.andExpect(status().isOk())
+
+		mockMvc.perform(get("$PARTICIPATION_URI/1/involvements"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("\$[?(@.type == '$involvement.type')]").exists())
+	}
+
+	@Test
+	void 'participation-involvement-delete'() {
+		def involvement = new Involvement(participationId: 1, type: 'Organizer')
+
+		mockMvc.perform(post("$PARTICIPATION_URI/involvements").contentType(MediaType.APPLICATION_JSON_UTF8)
+			.content(JsonOutput.toJson(involvement).bytes))
+				.andExpect(status().isOk())
+
+		mockMvc.perform(delete("$PARTICIPATION_URI/$involvement.participationId/involvements/$involvement.type"))
+				.andExpect(status().isOk())
+
+		mockMvc.perform(get("$PARTICIPATION_URI/$involvement.participationId/involvements"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("\$[?(@.type == '$involvement.type')]").doesNotExist())
 	}
 
 }

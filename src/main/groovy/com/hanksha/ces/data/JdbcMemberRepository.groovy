@@ -104,8 +104,7 @@ class JdbcMemberRepository implements MemberRepository {
 	@Override
 	boolean delete(int id) throws DataAccessException {
 		jdbc.update(
-				"DELETE FROM members "
-				+ "WHERE id = ?", id)
+				'DELETE FROM members WHERE id = ?', id)
 
 		true;
 	}

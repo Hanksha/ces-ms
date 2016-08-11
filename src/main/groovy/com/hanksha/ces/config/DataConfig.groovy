@@ -41,15 +41,6 @@ class DataConfig {
 				.build();
 	}
 
-	/*@Bean
-	@Profile('test')
-	public DataSource testDataSource() {
-		return new EmbeddedDatabaseBuilder()
-				.setType(EmbeddedDatabaseType.H2)
-				.addScripts('classpath:schema.sql', 'classpath:test-data.sql')
-				.build();
-	}*/
-
 	@Bean
 	public JdbcOperations jdbcTemplate(DataSource dataSource) {
 		return new JdbcTemplate(dataSource);
